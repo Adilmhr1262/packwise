@@ -141,7 +141,7 @@ function todayLocal() {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 function parseLocalDate(iso) {
-  if (!iso) return null;
+  if (typeof iso !== 'string' || !iso) return null;
   var p = iso.split('-');
   if (p.length !== 3) return null;
   var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
@@ -748,7 +748,9 @@ function importData(file) {
     var data;
     try { data = JSON.parse(String(reader.result)); }
     catch (e) { errEl.textContent = 'That file is not valid JSON. Nothing was changed.'; errEl.hidden = false; return; }
-    var problem = validateBackup(data);
+    var problem;
+    try { problem = validateBackup(data); }
+    catch (e) { problem = 'Unexpected validation error: ' + (e && e.message ? e.message : e); }
     if (problem) { errEl.textContent = 'Invalid backup: ' + problem + ' Nothing was changed.'; errEl.hidden = false; return; }
     askConfirm('Replace all data?', 'This will replace every list and item with the ' + data.lists.length + ' lists and ' + data.items.length + ' items from the backup.', 'Replace data')
       .then(function (ok) {
